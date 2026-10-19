@@ -1,0 +1,22 @@
+name: checks
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    env:
+      WEBHOOK_SECRET: ci-test-secret
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: docker compose config --quiet
+      - run: docker compose --profile test run --build --rm test
+      - run: docker compose up --build --wait --wait-timeout 90
+      - run: docker compose exec -T api python scripts/smoke_test.py
+      - if: failure()
+        run: docker compose logs --no-color
+      - if: always()
+        run: docker compose down --volumes

@@ -1,0 +1,7 @@
+-r requirements.txt
+pytest==9.1.1
+httpx==0.28.1
+ruff==0.17.1
+# Compatible with the httpx-based Starlette TestClient.
+anyio==4.12.1
+coverage==7.16.2

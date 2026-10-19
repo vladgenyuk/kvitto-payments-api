@@ -1,0 +1,35 @@
+name: kvitto-payments
+
+services:
+  api:
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:////data/kvitto.db
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-}
+    volumes:
+      - kvitto-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/tariffs', timeout=2)"
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+
+  test:
+    profiles: [test]
+    build:
+      context: .
+      target: test
+    network_mode: none
+
+volumes:
+  kvitto-data:
